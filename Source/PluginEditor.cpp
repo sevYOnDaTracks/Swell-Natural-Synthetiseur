@@ -1022,13 +1022,13 @@ void SwellContent::paint (Graphics& g)
     // Status
     g.setColour (faint.brighter (0.5f));
     g.setFont (swellFont (12.0f));
-    const int statusX = settingsButton.getX() - 200, statusH = settingsButton.getHeight() / 2;
+    const int statusX = settingsButton.getX() - 260, statusW = 246;
     g.drawText ("Voices " + String (proc.getActiveVoices()) + "/64   CPU " + String (roundToInt (proc.getCpuLoad() * 100.0f)) + "%",
-                statusX, settingsButton.getY() + 1, 186, statusH, Justification::centredRight);
+                statusX, 25, statusW, 17, Justification::centredRight);
     g.setColour (faint.brighter (0.3f));
     g.setFont (swellFont (11.0f));
     g.drawText (String ("v") + JucePlugin_VersionString + utf8 ("  \xc2\xb7  by @sevyondatracks"),
-                statusX, settingsButton.getY() + statusH - 1, 186, statusH, Justification::centredRight);
+                statusX, 42, statusW, 16, Justification::centredRight);
 
     if (page == soundsPage)
     {
@@ -1108,7 +1108,9 @@ void SwellContent::resized()
     for (int i = 0; i < 3; ++i)
         tabs[i].setBounds (430 + i * 142, 14, 138, 38);
     settingsButton.setBounds (R - 46, 13, 46, 40);
-    licenceBadge.setBounds (tabs[2].getRight() + 18, settingsButton.getY(), 186, settingsButton.getHeight());
+    // Colonne d'état à gauche de la roue : licence, voix/CPU, version (trois lignes alignées à droite).
+    licenceBadge.setBounds (settingsButton.getX() - 260, 8, 246, 17);
+    licenceBadge.setFontHeight (12.0f);
 
     // ---------- Sounds page
     const int y1 = 76, row1H = 330, y2 = y1 + row1H + 10, row2H = 178;

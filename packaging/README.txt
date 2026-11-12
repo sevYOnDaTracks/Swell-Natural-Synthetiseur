@@ -1,4 +1,4 @@
-SWELL — NATURAL SYNTHETISER 2.0.2
+SWELL — NATURAL SYNTHETISER 2.0.3
 Installation et premier lancement
 
 1. Téléchargez l’installateur de votre système sur swell-audio.fr.

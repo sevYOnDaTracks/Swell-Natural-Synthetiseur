@@ -459,7 +459,7 @@ void LicenceBadge::paint (juce::Graphics& g)
 {
     if (! licence->isUnlocked()) return;
     const auto info = licence->info();
-    g.setFont (juce::FontOptions (9.f));
+    g.setFont (juce::FontOptions (fontHeight));
     if (info.isTrial())
     {
         const int days = licence->trialDaysLeft();

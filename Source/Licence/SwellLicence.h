@@ -151,6 +151,7 @@ public:
     LicenceBadge (juce::Colour text, juce::Colour hover, juce::Justification align = juce::Justification::centredRight);
     ~LicenceBadge() override;
     void paint (juce::Graphics&) override;
+    void setFontHeight (float h) { fontHeight = h; repaint(); }
     void mouseUp (const juce::MouseEvent&) override;
     void mouseEnter (const juce::MouseEvent&) override { repaint(); }
     void mouseExit (const juce::MouseEvent&) override { repaint(); }
@@ -161,5 +162,6 @@ private:
     juce::SharedResourcePointer<Licence> licence;
     juce::Colour text, hover;
     juce::Justification align;
+    float fontHeight = 9.0f;
 };
 } // namespace swell

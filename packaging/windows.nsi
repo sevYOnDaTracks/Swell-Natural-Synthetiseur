@@ -9,15 +9,15 @@ Unicode true
 !endif
 !define PRODUCT "Swell - Natural Synthetiser"
 !define REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\SwellNaturalSynthetiser"
-Name "${PRODUCT} 2.0.2"
+Name "${PRODUCT} 2.0.3"
 OutFile "${OUTPUT}"
 InstallDir "$PROGRAMFILES64\Swell\Natural Synthetiser"
 RequestExecutionLevel admin
 SetCompressor /SOLID lzma
-VIProductVersion 2.0.2.0
+VIProductVersion 2.0.3.0
 VIAddVersionKey "ProductName" "${PRODUCT}"
-VIAddVersionKey "ProductVersion" "2.0.2"
-VIAddVersionKey "FileVersion" "2.0.2"
+VIAddVersionKey "ProductVersion" "2.0.3"
+VIAddVersionKey "FileVersion" "2.0.3"
 VIAddVersionKey "FileDescription" "Swell Natural Synthetiser Setup"
 VIAddVersionKey "LegalCopyright" "Swell Audio"
 !define MUI_WELCOMEPAGE_TEXT "Cet assistant installe l’instrument VST3 et son application autonome. Téléchargez aussi Swell-Library.zip et extrayez la banque. Au premier lancement, choisissez le dossier Swell Library."
@@ -51,7 +51,7 @@ Section "Instrument"
     WriteUninstaller "$INSTDIR\Uninstall.exe"
     WriteRegStr HKLM "${REGKEY}" "DisplayName" "${PRODUCT}"
     WriteRegStr HKLM "${REGKEY}" "Publisher" "Swell Audio"
-    WriteRegStr HKLM "${REGKEY}" "DisplayVersion" "2.0.2"
+    WriteRegStr HKLM "${REGKEY}" "DisplayVersion" "2.0.3"
     WriteRegStr HKLM "${REGKEY}" "InstallLocation" "$INSTDIR"
     WriteRegStr HKLM "${REGKEY}" "DisplayIcon" "$INSTDIR\${PRODUCT}.exe"
     WriteRegStr HKLM "${REGKEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
