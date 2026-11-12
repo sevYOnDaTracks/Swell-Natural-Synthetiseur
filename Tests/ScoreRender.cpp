@@ -287,6 +287,7 @@ static int renderTour (const File& outWav, const File& outJson)
 int main (int argc, char** argv)
 {
     ScopedJuceInitialiser_GUI gui;
+    swell::Licence::unlockForTesting();
     const File outWav (argc > 1 ? argv[1] : "/tmp/swell_promo.wav");
     const File outJson (argc > 2 ? argv[2] : "/tmp/swell_promo_events.json");
     if (argc > 3 && String (argv[3]) == "tour")

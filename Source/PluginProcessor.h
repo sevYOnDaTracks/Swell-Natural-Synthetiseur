@@ -5,6 +5,7 @@
 #include <juce_dsp/juce_dsp.h>
 #include "SwellBank.h"
 #include "SamplerEngine.h"
+#include "Licence/SwellLicence.h"
 
 class SwellProcessor : public juce::AudioProcessor,
                        private juce::Thread,
@@ -60,6 +61,8 @@ public:
     void setUiScale (float s) { uiScale = s; saveSettings(); }
 
     juce::AudioProcessorValueTreeState apvts;
+    // Licence Swell, partagée par toutes les instances : silence tant que le plugin n'est pas activé.
+    juce::SharedResourcePointer<swell::Licence> licence;
     juce::MidiKeyboardState keyboardState;
 
 private:

@@ -326,6 +326,11 @@ void SwellProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midi)
     const auto t0 = Time::getHighResolutionTicks();
     const int numSamples = buffer.getNumSamples();
     buffer.clear();
+    if (! licence->isUnlocked())
+    {
+        midi.clear();
+        return;
+    }
 
     engine.setInstrument (audioInstrument.load());
     updateEngineParams();

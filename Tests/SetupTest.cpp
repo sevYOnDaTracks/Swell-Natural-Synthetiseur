@@ -24,6 +24,7 @@ static bool showsChooser (Component& component)
 int main()
 {
     ScopedJuceInitialiser_GUI gui;
+    swell::Licence::unlockForTesting();
     const TemporaryFile temp;
     const auto root = temp.getFile();
     const auto prefs = root.getChildFile ("prefs/settings.xml");

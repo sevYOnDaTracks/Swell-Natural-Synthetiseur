@@ -613,6 +613,8 @@ SwellContent::SwellContent (SwellProcessor& p, SwellEditor& e)
     searchButton.onClick = [this] { setSearchVisible (! searchVisible); };
     addAndMakeVisible (searchButton);
 
+    addAndMakeVisible (licenceBadge);
+
     // Hero
     hero.onToggleFavourite = [this] { if (auto i = proc.getInstrument()) toggleFavourite (i->soundId); };
     addAndMakeVisible (hero);
@@ -1090,6 +1092,7 @@ void SwellContent::resized()
     for (int i = 0; i < 3; ++i)
         tabs[i].setBounds (430 + i * 142, 14, 138, 38);
     settingsButton.setBounds (R - 46, 13, 46, 40);
+    licenceBadge.setBounds (settingsButton.getX() - 480, settingsButton.getY(), 240, settingsButton.getHeight());
 
     // ---------- Sounds page
     const int y1 = 76, row1H = 330, y2 = y1 + row1H + 10, row2H = 178;
@@ -1194,8 +1197,14 @@ void SwellContent::resized()
 
 // ================================================================== Editor
 
+static swell::LicencePanel::Style licenceStyle (int theme)
+{
+    SwellTheme::currentIndex = jlimit (0, SwellTheme::numThemes - 1, theme);
+    return { Colour (0xff0c0c0d), SwellTheme::panelTop, SwellTheme::text, SwellTheme::dim, A().accent, Colour (0xffff6b5b) };
+}
+
 SwellEditor::SwellEditor (SwellProcessor& p)
-    : AudioProcessorEditor (p), proc (p), content (p, *this), settings (*this)
+    : AudioProcessorEditor (p), proc (p), content (p, *this), settings (*this), licenceGuard (*this, licenceStyle (p.getTheme()))
 {
     SwellTheme::currentIndex = jlimit (0, SwellTheme::numThemes - 1, p.getTheme());
     lnf.applyTheme();

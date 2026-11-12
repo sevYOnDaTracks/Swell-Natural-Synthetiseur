@@ -34,6 +34,7 @@ static double yin (const float* x, int n, double sr)
 int main (int argc, char** argv)
 {
     ScopedJuceInitialiser_GUI gui;
+    swell::Licence::unlockForTesting();
     const File outDir (argc > 1 ? argv[1] : "/tmp");
     const int maxSounds = argc > 2 ? atoi (argv[2]) : 100000;
     auto proc = std::make_unique<SwellProcessor>();

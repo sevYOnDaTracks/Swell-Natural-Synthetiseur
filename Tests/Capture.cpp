@@ -10,6 +10,8 @@ static void pump (int ms) { CFRunLoopRunInMode (kCFRunLoopDefaultMode, ms / 1000
 int main (int argc, char** argv)
 {
     ScopedJuceInitialiser_GUI gui;
+    const bool licenceShot = argc > 2 && String (argv[2]) == "licence";
+    if (! licenceShot) swell::Licence::unlockForTesting();
     const File out (argc > 1 ? argv[1] : "/tmp");
     out.createDirectory();
     auto proc = std::make_unique<SwellProcessor>();
@@ -44,6 +46,13 @@ int main (int argc, char** argv)
         std::cout << name << " " << img.getWidth() << "x" << img.getHeight() << "\n";
     };
     const auto full = ed->getLocalBounds();
+
+    if (licenceShot)
+    {
+        select ("GrandPiano Live!");
+        save ("licence.png", full, 2.0f);
+        return 0;
+    }
 
     if (argc > 2 && String (argv[2]) == "tour")
     {

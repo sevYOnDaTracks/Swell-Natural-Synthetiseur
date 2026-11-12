@@ -22,6 +22,18 @@ else()
     FetchContent_MakeAvailable(JUCE)
 endif()
 
+# Monocypher (BSD-2 / CC0): Ed25519 check of the Swell licence files.
+include(FetchContent)
+FetchContent_Declare(monocypher
+    GIT_REPOSITORY https://github.com/LoupVaillant/Monocypher.git
+    GIT_TAG 4.0.3
+    GIT_SHALLOW TRUE
+    SOURCE_SUBDIR none)
+FetchContent_MakeAvailable(monocypher)
+add_library(monocypher STATIC "${monocypher_SOURCE_DIR}/src/monocypher.c" "${monocypher_SOURCE_DIR}/src/optional/monocypher-ed25519.c")
+target_include_directories(monocypher PUBLIC "${monocypher_SOURCE_DIR}/src" "${monocypher_SOURCE_DIR}/src/optional")
+set_target_properties(monocypher PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 option(SWELL_BUILD_PLUGIN "Build the Swell Natural Synthetiser plug-in" ON)
 option(SWELL_BUILD_BANK_BUILDER "Build the Swell Library bank builder tool" ON)
 option(SWELL_COPY_AFTER_BUILD "Install built plug-ins in the user plug-in folders" ${APPLE})
@@ -67,7 +79,8 @@ if(SWELL_BUILD_PLUGIN)
     target_sources(SwellNaturalSynth PRIVATE
         Source/SwellBank.cpp
         Source/PluginProcessor.cpp
-        Source/PluginEditor.cpp)
+        Source/PluginEditor.cpp
+        Source/Licence/SwellLicence.cpp)
 
     target_compile_definitions(SwellNaturalSynth PUBLIC
         JUCE_WEB_BROWSER=0
@@ -79,6 +92,8 @@ if(SWELL_BUILD_PLUGIN)
     target_link_libraries(SwellNaturalSynth
         PRIVATE
             SwellNaturalSynthData
+            monocypher
+            juce::juce_cryptography
             juce::juce_audio_utils
             juce::juce_dsp
         PUBLIC

@@ -217,6 +217,7 @@ private:
     std::unique_ptr<juce::ParameterAttachment> modeAttachment, octaveAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> slideArtAttachment;
     std::unique_ptr<juce::FileChooser> chooser;
+    swell::LicenceBadge licenceBadge { SwellTheme::dim, SwellTheme::text };
 
     std::vector<int> visibleSounds;
     int currentCategory = 0, currentMode = 0, currentOctave = 0;
@@ -249,6 +250,7 @@ private:
     SwellLookAndFeel lnf;
     SwellContent content;
     SettingsPanel settings;
+    swell::LicenceGuard licenceGuard;   // écran d'activation, au-dessus de tout tant qu'il n'y a pas de licence
     juce::ComponentBoundsConstrainer constrainer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SwellEditor)
