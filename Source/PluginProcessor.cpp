@@ -19,10 +19,11 @@ static File settingsFile()
         .getChildFile ("Swell/Natural Synthetiser/settings.xml");
 }
 
-SwellProcessor::SwellProcessor()
+SwellProcessor::SwellProcessor (File preferences)
     : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
       Thread ("Swell loader"),
-      apvts (*this, nullptr, "SwellNatural", createLayout())
+      apvts (*this, nullptr, "SwellNatural", createLayout()),
+      preferencesFile (preferences == File() ? settingsFile() : preferences)
 {
     pAttack = apvts.getRawParameterValue ("attack");
     pDecay = apvts.getRawParameterValue ("decay");
@@ -128,7 +129,7 @@ AudioProcessorValueTreeState::ParameterLayout SwellProcessor::createLayout()
 void SwellProcessor::loadSettings()
 {
     File folder;
-    if (auto xml = parseXML (settingsFile()))
+    if (auto xml = parseXML (preferencesFile))
     {
         folder = File (xml->getStringAttribute ("library"));
         favourites.addTokens (xml->getStringAttribute ("favourites"), "|", "");
@@ -141,26 +142,25 @@ void SwellProcessor::loadSettings()
     if (folder != File() && bank.load (folder, err))
         return;
 
-    for (auto& f : swell::SwellBank::defaultLocations())
-        if (bank.load (f, err))
-        {
-            saveSettings();
-            bankError = {};
-            return;
-        }
-    bankError = "Swell Library introuvable. Choisis le dossier de la banque.";
+    bankError = err.isNotEmpty() ? err : "Choose your Swell Library folder.";
 }
 
-void SwellProcessor::saveSettings()
+void SwellProcessor::saveSettings (bool libraryChanged)
 {
-    // Merge with what other instances may have written meanwhile
+    InterProcessLock settingsLock ("SwellNaturalSynthetiserPrefs");
+    const InterProcessLock::ScopedLockType guard (settingsLock);
+    if (! guard.isLocked()) return;
+    auto previous = parseXML (preferencesFile);
     XmlElement xml ("SwellNatural");
-    xml.setAttribute ("library", bank.root.getFullPathName());
+    if (libraryChanged)
+        xml.setAttribute ("library", bank.root.getFullPathName());
+    else if (previous != nullptr)
+        xml.setAttribute ("library", previous->getStringAttribute ("library"));
     xml.setAttribute ("favourites", favourites.joinIntoString ("|"));
     xml.setAttribute ("theme", theme);
     xml.setAttribute ("scale", (double) uiScale);
-    settingsFile().getParentDirectory().createDirectory();
-    xml.writeTo (settingsFile());
+    preferencesFile.getParentDirectory().createDirectory();
+    xml.writeTo (preferencesFile);
 }
 
 void SwellProcessor::toggleFavourite (const String& id)
@@ -189,7 +189,7 @@ bool SwellProcessor::setLibraryFolder (const File& folder)
         bank = std::move (fresh);
     }
     bankError = {};
-    saveSettings();
+    saveSettings (true);
     selectedSound = -1;
     const int idx = pendingSoundId.isNotEmpty() ? bank.findSound (pendingSoundId) : -1;
     selectSound (idx >= 0 ? idx : bank.categories[0].sounds.empty() ? 0 : bank.categories[0].sounds[0]);

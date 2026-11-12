@@ -505,6 +505,7 @@ SettingsPanel::SettingsPanel (SwellEditor& e) : editor (e)
 
 void SettingsPanel::refresh()
 {
+    changeLibrary.setButtonText (editor.getProcessor().getBank().isLoaded() ? "Change..." : String::fromUTF8 ("Choose folder…"));
     const float sc = editor.getProcessor().getUiScale();
     for (int i = 0; i < sizeButtons.size(); ++i)
         sizeButtons[i]->setToggleState (std::abs (scales[i] - sc) < 0.01f, dontSendNotification);
@@ -526,7 +527,8 @@ void SettingsPanel::paint (Graphics& g)
     auto r = card.reduced (28, 22);
     g.setColour (text);
     g.setFont (serifFont (26.0f));
-    g.drawText ("Settings", r.removeFromTop (34), Justification::centredLeft);
+    const auto& bank = editor.getProcessor().getBank();
+    g.drawText (bank.isLoaded() ? "Settings" : "Choose your sound library", r.removeFromTop (34), Justification::centredLeft);
     r.removeFromTop (12);
 
     drawCapsLabel (g, "Swell Library location", r.removeFromTop (18), Justification::centredLeft, 12.5f);
@@ -534,14 +536,13 @@ void SettingsPanel::paint (Graphics& g)
     auto pathRow = r.removeFromTop (36);
     pathRow.removeFromRight (130);
     drawWell (g, pathRow.toFloat());
-    const auto& bank = editor.getProcessor().getBank();
     g.setColour (bank.isLoaded() ? text : dim);
     g.setFont (swellFont (13.0f));
-    g.drawFittedText (bank.isLoaded() ? bank.root.getFullPathName() : String ("No library"), pathRow.reduced (12, 0), Justification::centredLeft, 1);
+    g.drawFittedText (bank.isLoaded() ? bank.root.getFullPathName() : String ("Select the extracted Swell Library folder"), pathRow.reduced (12, 0), Justification::centredLeft, 1);
     r.removeFromTop (6);
     g.setColour (faint.brighter (0.3f));
     g.setFont (swellFont (12.0f));
-    g.drawText (bank.isLoaded() ? String ((int) bank.sounds.size()) + " sounds in " + String ((int) bank.categories.size()) + " categories" : String(),
+    g.drawText (bank.isLoaded() ? String ((int) bank.sounds.size()) + " sounds in " + String ((int) bank.categories.size()) + " categories" : String ("The folder must contain Swell Library.swellbank and Samples."),
                 r.removeFromTop (16), Justification::centredLeft);
     r.removeFromTop (18);
     drawCapsLabel (g, "Interface size", r.removeFromTop (18), Justification::centredLeft, 12.5f);
@@ -1210,6 +1211,8 @@ SwellEditor::SwellEditor (SwellProcessor& p)
     setConstrainer (&constrainer);
     setResizable (true, true);
     setSize (roundToInt (SwellContent::baseW * s), roundToInt (SwellContent::baseH * s));
+    if (! proc.getBank().isLoaded())
+        showSettings (true);
 }
 
 SwellEditor::~SwellEditor()

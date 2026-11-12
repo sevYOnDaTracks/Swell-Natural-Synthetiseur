@@ -22,44 +22,52 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSWELL_COPY_AFTER_BUILD=OFF -DSWELL_BUILD_BANK_BUILDER=ON
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSWELL_COPY_AFTER_BUILD=OFF -DSWELL_BUILD_BANK_BUILDER=OFF -DSWELL_BUILD_SETUP_TEST=ON
 
       - name: Build
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --config Release --parallel 3
+
+      - name: Check first-time setup (macOS)
+        if: runner.os == 'macOS'
+        run: build/SwellSetupTest_artefacts/Release/SwellSetupTest
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
         run: |
-          A="build/SwellNaturalSynth_artefacts/Release"
-          OUT="Swell-Natural-Synthetiser-macOS"
-          mkdir -p "$OUT"
-          cp -R "$A/VST3/Swell - Natural Synthetiser.vst3" "$A/AU/Swell - Natural Synthetiser.component" "$A/Standalone/Swell - Natural Synthetiser.app" "$OUT/"
-          cp build/SwellBankBuilder_artefacts/Release/SwellBankBuilder "$OUT/"
-          ditto -c -k --sequesterRsrc --keepParent "$OUT" "$OUT.zip"
+          mkdir -p installers
+          bash packaging/macos.sh build/SwellNaturalSynth_artefacts/Release "$PWD/installers/Swell-Natural-Synthetiser-2.0.1-macOS.pkg"
 
-      - name: Package (Windows)
+      - name: Check first-time setup (Windows)
+        if: runner.os == 'Windows'
+        run: .\build\SwellSetupTest_artefacts\Release\SwellSetupTest.exe
+
+      - name: Package and test installer (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $A = "build/SwellNaturalSynth_artefacts/Release"
-          $OUT = "Swell-Natural-Synthetiser-Windows"
-          New-Item -ItemType Directory -Force -Path $OUT | Out-Null
-          Copy-Item -Recurse "$A/VST3/Swell - Natural Synthetiser.vst3" $OUT
-          Copy-Item "$A/Standalone/Swell - Natural Synthetiser.exe" $OUT
-          Copy-Item "build/SwellBankBuilder_artefacts/Release/SwellBankBuilder.exe" $OUT
-          Set-Content -Path "$OUT/INSTALL.txt" -Value @"
-          Swell - Natural Synthetiser (Windows x64)
-
-          1. Copy "Swell - Natural Synthetiser.vst3" to C:\Program Files\Common Files\VST3\
-          2. "Swell - Natural Synthetiser.exe" is the standalone app.
-          3. Put the "Swell Library" folder anywhere, then pick it in Settings.
-          "@
-          Compress-Archive -Path $OUT -DestinationPath "$OUT.zip"
+          $ErrorActionPreference = 'Stop'
+          $nsis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          if (!(Test-Path $nsis)) { choco install nsis -y --no-progress }
+          New-Item -ItemType Directory -Force installers | Out-Null
+          $output = Join-Path $PWD 'installers\Swell-Natural-Synthetiser-2.0.1-Windows-x64.exe'
+          & $nsis "/DBUILD=$PWD\build\SwellNaturalSynth_artefacts\Release" "/DOUTPUT=$output" packaging\windows.nsi
+          if ($LASTEXITCODE -ne 0) { throw "Installer build failed" }
+          $install = Start-Process $output -ArgumentList '/S' -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Installer returned $($install.ExitCode)" }
+          $name = 'Swell - Natural Synthetiser'
+          $app = "$env:ProgramFiles\Swell\Natural Synthetiser"
+          $vst = "$env:CommonProgramFiles\VST3\$name.vst3\Contents\x86_64-win\$name.vst3"
+          foreach ($file in @("$app\$name.exe", "$app\README.txt", "$app\Uninstall.exe", $vst)) {
+            if (!(Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing $file" }
+          }
+          $version = (Get-Item -LiteralPath "$app\$name.exe").VersionInfo.ProductVersion
+          if ($version -notlike '2.0.1*') { throw "Unexpected installed version $version" }
+          Write-Host "Verified installed application, x64 VST3, version, README and uninstaller."
 
       - uses: actions/upload-artifact@v4
         with:
           name: Swell-Natural-Synthetiser-${{ matrix.name }}
-          path: Swell-Natural-Synthetiser-*.zip
+          path: installers/*
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -74,4 +82,4 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.zip
+          files: dist/*

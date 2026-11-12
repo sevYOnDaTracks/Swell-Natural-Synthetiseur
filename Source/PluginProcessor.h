@@ -11,7 +11,7 @@ class SwellProcessor : public juce::AudioProcessor,
                        private juce::Timer
 {
 public:
-    SwellProcessor();
+    explicit SwellProcessor (juce::File preferences = juce::File());
     ~SwellProcessor() override;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -67,9 +67,10 @@ private:
     void run() override;          // loader thread
     void timerCallback() override; // installs loaded sounds, frees retired ones
     void loadSettings();
-    void saveSettings();
+    void saveSettings (bool libraryChanged = false);
     void updateEngineParams();
 
+    const juce::File preferencesFile;
     juce::StringArray favourites;
     int theme = 0;
     float uiScale = 1.0f;

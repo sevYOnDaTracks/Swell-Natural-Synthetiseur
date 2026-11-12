@@ -51,7 +51,6 @@ public:
     std::vector<CategoryInfo> categories;
     std::vector<SoundInfo> sounds;
 
-    static juce::Array<juce::File> defaultLocations();
 };
 
 // A sound decoded into RAM, ready for the audio thread. Immutable once built.

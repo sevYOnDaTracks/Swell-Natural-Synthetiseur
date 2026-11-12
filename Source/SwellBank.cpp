@@ -5,22 +5,9 @@ namespace swell
 {
 using namespace juce;
 
-Array<File> SwellBank::defaultLocations()
-{
-    Array<File> dirs;
-    dirs.add (File ("/Volumes/SSD/Banque Kontakt/Swell Library"));
-    dirs.add (File::getSpecialLocation (File::userMusicDirectory).getChildFile ("Swell Library"));
-    dirs.add (File::getSpecialLocation (File::userDocumentsDirectory).getChildFile ("Swell Library"));
-    dirs.add (File::getSpecialLocation (File::commonApplicationDataDirectory).getChildFile ("Swell/Swell Library"));
-    dirs.add (File::getSpecialLocation (File::userApplicationDataDirectory).getChildFile ("Swell/Swell Library"));
-   #if JUCE_MAC
-    dirs.add (File ("/Users/Shared/Swell Library"));
-   #endif
-    return dirs;
-}
-
 bool SwellBank::load (const File& folder, String& error)
 {
+    root = File();
     categories.clear();
     sounds.clear();
 
@@ -28,6 +15,12 @@ bool SwellBank::load (const File& folder, String& error)
     if (! index.existsAsFile())
     {
         error = "Swell Library introuvable dans " + folder.getFullPathName();
+        return false;
+    }
+
+    if (! folder.getChildFile ("Samples").isDirectory())
+    {
+        error = "Extract the complete Swell Library ZIP. The Samples folder is missing.";
         return false;
     }
 
@@ -39,7 +32,6 @@ bool SwellBank::load (const File& folder, String& error)
         return false;
     }
 
-    root = folder;
     for (const auto& c : *cats)
     {
         CategoryInfo cat;
@@ -99,6 +91,14 @@ bool SwellBank::load (const File& folder, String& error)
         error = "La banque ne contient aucun son";
         return false;
     }
+    if (! folder.getChildFile (sounds.front().zones.front().file).existsAsFile())
+    {
+        sounds.clear();
+        categories.clear();
+        error = "Sample files are missing. Extract the complete Swell Library ZIP.";
+        return false;
+    }
+    root = folder;
     return true;
 }
 
