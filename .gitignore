@@ -16,3 +16,8 @@ JUCE/
 
 # Packaged releases
 dist/
+
+# Promo renders
+promo/renders/
+promo/assets/audio/*.wav
+promo/node_modules/
