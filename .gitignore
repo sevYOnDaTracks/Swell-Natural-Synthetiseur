@@ -1,0 +1,15 @@
+# Build outputs
+build/
+build-*/
+build-tool/
+# JUCE is fetched by CMake (FetchContent) when this folder is absent
+JUCE/
+# Sound bank / audio (the Swell Library lives outside the repository)
+*.flac
+*.wav
+*.ncw
+*.nki
+*.swellbank
+# macOS
+.DS_Store
+._*
