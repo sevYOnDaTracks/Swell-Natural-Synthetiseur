@@ -13,3 +13,6 @@ JUCE/
 # macOS
 .DS_Store
 ._*
+
+# Packaged releases
+dist/

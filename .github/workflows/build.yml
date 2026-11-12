@@ -1,0 +1,77 @@
+name: Build plug-ins
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS
+            os: macos-14
+          - name: Windows
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSWELL_COPY_AFTER_BUILD=OFF -DSWELL_BUILD_BANK_BUILDER=ON
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          A="build/SwellNaturalSynth_artefacts/Release"
+          OUT="Swell-Natural-Synthetiser-macOS"
+          mkdir -p "$OUT"
+          cp -R "$A/VST3/Swell - Natural Synthetiser.vst3" "$A/AU/Swell - Natural Synthetiser.component" "$A/Standalone/Swell - Natural Synthetiser.app" "$OUT/"
+          cp build/SwellBankBuilder_artefacts/Release/SwellBankBuilder "$OUT/"
+          ditto -c -k --sequesterRsrc --keepParent "$OUT" "$OUT.zip"
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $A = "build/SwellNaturalSynth_artefacts/Release"
+          $OUT = "Swell-Natural-Synthetiser-Windows"
+          New-Item -ItemType Directory -Force -Path $OUT | Out-Null
+          Copy-Item -Recurse "$A/VST3/Swell - Natural Synthetiser.vst3" $OUT
+          Copy-Item "$A/Standalone/Swell - Natural Synthetiser.exe" $OUT
+          Copy-Item "build/SwellBankBuilder_artefacts/Release/SwellBankBuilder.exe" $OUT
+          Set-Content -Path "$OUT/INSTALL.txt" -Value @"
+          Swell - Natural Synthetiser (Windows x64)
+
+          1. Copy "Swell - Natural Synthetiser.vst3" to C:\Program Files\Common Files\VST3\
+          2. "Swell - Natural Synthetiser.exe" is the standalone app.
+          3. Put the "Swell Library" folder anywhere, then pick it in Settings.
+          "@
+          Compress-Archive -Path $OUT -DestinationPath "$OUT.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Swell-Natural-Synthetiser-${{ matrix.name }}
+          path: Swell-Natural-Synthetiser-*.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
