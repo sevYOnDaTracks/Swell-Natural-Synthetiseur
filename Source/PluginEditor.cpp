@@ -520,6 +520,8 @@ void SettingsPanel::mouseDown (const MouseEvent& e)
         editor.showSettings (false);
 }
 
+static void drawSettingsFooter (Graphics&, Rectangle<int> card);
+
 void SettingsPanel::paint (Graphics& g)
 {
     g.fillAll (Colours::black.withAlpha (0.65f));
@@ -548,6 +550,15 @@ void SettingsPanel::paint (Graphics& g)
     drawCapsLabel (g, "Interface size", r.removeFromTop (18), Justification::centredLeft, 12.5f);
     r.removeFromTop (6 + 36 + 18);
     drawCapsLabel (g, "Theme", r.removeFromTop (18), Justification::centredLeft, 12.5f);
+    drawSettingsFooter (g, card);
+}
+
+static void drawSettingsFooter (Graphics& g, Rectangle<int> card)
+{
+    g.setColour (faint.brighter (0.4f));
+    g.setFont (swellFont (12.0f));
+    g.drawText (String ("Swell - Natural Synthetiser v") + JucePlugin_VersionString + utf8 ("  \xc2\xb7  by @sevyondatracks"),
+                card.getX() + 28, card.getBottom() - 22 - 36, card.getWidth() - 56 - 130, 36, Justification::centredLeft);
 }
 
 void SettingsPanel::resized()
@@ -1011,8 +1022,13 @@ void SwellContent::paint (Graphics& g)
     // Status
     g.setColour (faint.brighter (0.5f));
     g.setFont (swellFont (12.0f));
+    const int statusX = settingsButton.getX() - 200, statusH = settingsButton.getHeight() / 2;
     g.drawText ("Voices " + String (proc.getActiveVoices()) + "/64   CPU " + String (roundToInt (proc.getCpuLoad() * 100.0f)) + "%",
-                settingsButton.getX() - 230, settingsButton.getY(), 216, settingsButton.getHeight(), Justification::centredRight);
+                statusX, settingsButton.getY() + 1, 186, statusH, Justification::centredRight);
+    g.setColour (faint.brighter (0.3f));
+    g.setFont (swellFont (11.0f));
+    g.drawText (String ("v") + JucePlugin_VersionString + utf8 ("  \xc2\xb7  by @sevyondatracks"),
+                statusX, settingsButton.getY() + statusH - 1, 186, statusH, Justification::centredRight);
 
     if (page == soundsPage)
     {
@@ -1092,7 +1108,7 @@ void SwellContent::resized()
     for (int i = 0; i < 3; ++i)
         tabs[i].setBounds (430 + i * 142, 14, 138, 38);
     settingsButton.setBounds (R - 46, 13, 46, 40);
-    licenceBadge.setBounds (settingsButton.getX() - 480, settingsButton.getY(), 240, settingsButton.getHeight());
+    licenceBadge.setBounds (tabs[2].getRight() + 18, settingsButton.getY(), 186, settingsButton.getHeight());
 
     // ---------- Sounds page
     const int y1 = 76, row1H = 330, y2 = y1 + row1H + 10, row2H = 178;

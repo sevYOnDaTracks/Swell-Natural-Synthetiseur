@@ -16,13 +16,14 @@ inline const SwellPalette palettes[] = {
     { "Emeraude", juce::Colour (0xff22d38f), juce::Colour (0xff0d6448), juce::Colour (0xffa6f5d2) },
     { "Abysse",   juce::Colour (0xff3ea0ff), juce::Colour (0xff163f73), juce::Colour (0xffb5dcff) },
     { "Ambre",    juce::Colour (0xffff8c39), juce::Colour (0xff86410f), juce::Colour (0xffffd39d) },
+    { "Noir",     juce::Colour (0xff6e6e74), juce::Colour (0xff26262a), juce::Colour (0xffd6d6da) },
 };
-inline constexpr int numThemes = 4;
+inline constexpr int numThemes = 5;
 inline int currentIndex = 0;
 inline const SwellPalette& c() { return palettes[currentIndex]; }
 inline juce::String displayName (int i)
 {
-    static const char* names[] = { "Rubis", "\xc3\x89meraude", "Abysse", "Ambre" };
+    static const char* names[] = { "Rubis", "\xc3\x89meraude", "Abysse", "Ambre", "Noir" };
     return juce::String::fromUTF8 (names[juce::jlimit (0, numThemes - 1, i)]);
 }
 

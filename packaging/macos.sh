@@ -32,18 +32,18 @@ for item in components:
 with open(path, 'wb') as f:
     plistlib.dump(components, f)
 PY
-pkgbuild --root "$root" --component-plist "$stage/components.plist" --ownership recommended --install-location / --identifier com.swell.naturalsynthetiser.installer --version 2.0.1 "$stage/instrument.pkg"
+pkgbuild --root "$root" --component-plist "$stage/components.plist" --ownership recommended --install-location / --identifier com.swell.naturalsynthetiser.installer --version 2.0.2 "$stage/instrument.pkg"
 cat > "$stage/Distribution.xml" <<'XML'
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="2">
-  <title>Swell - Natural Synthetiser 2.0.1</title>
+  <title>Swell - Natural Synthetiser 2.0.2</title>
   <readme file="README.txt" mime-type="text/plain"/>
   <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64"/>
   <domains enable_localSystem="true" enable_currentUserHome="false" enable_anywhere="false"/>
   <volume-check><allowed-os-versions><os-version min="11.0"/></allowed-os-versions></volume-check>
   <choices-outline><line choice="instrument"/></choices-outline>
   <choice id="instrument" visible="false"><pkg-ref id="com.swell.naturalsynthetiser.installer"/></choice>
-  <pkg-ref id="com.swell.naturalsynthetiser.installer" version="2.0.1">instrument.pkg</pkg-ref>
+  <pkg-ref id="com.swell.naturalsynthetiser.installer" version="2.0.2">instrument.pkg</pkg-ref>
 </installer-gui-script>
 XML
 sign_args=()

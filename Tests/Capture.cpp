@@ -47,6 +47,20 @@ int main (int argc, char** argv)
     };
     const auto full = ed->getLocalBounds();
 
+    if (argc > 2 && String (argv[2]) == "noir")
+    {
+        setP ("cutoff", 20000.0f);
+        select ("GrandPiano Live!");
+        save ("default.png", full, 2.0f);
+        se->setTheme (4);
+        save ("noir.png", full, 2.0f);
+        se->showSettings (true);
+        save ("settings.png", full, 2.0f);
+        se->showSettings (false);
+        se->setTheme (0);
+        return 0;
+    }
+
     if (licenceShot)
     {
         select ("GrandPiano Live!");
