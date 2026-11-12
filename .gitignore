@@ -21,3 +21,7 @@ dist/
 promo/renders/
 promo/assets/audio/*.wav
 promo/node_modules/
+
+promo/
+._*
+.DS_Store
