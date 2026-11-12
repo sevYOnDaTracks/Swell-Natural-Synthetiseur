@@ -61,7 +61,8 @@ if(SWELL_BUILD_PLUGIN)
         VST3_CATEGORIES Instrument Sampler
         AU_MAIN_TYPE kAudioUnitType_MusicDevice)
 
-    juce_add_binary_data(SwellNaturalSynthData SOURCES Resources/swell_mark.png)
+    file(GLOB SWELL_HERO_PHOTOS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Resources/hero/*.jpg")
+    juce_add_binary_data(SwellNaturalSynthData SOURCES Resources/swell_mark.png ${SWELL_HERO_PHOTOS})
 
     target_sources(SwellNaturalSynth PRIVATE
         Source/SwellBank.cpp
@@ -94,6 +95,12 @@ if(SWELL_BUILD_TESTS AND SWELL_BUILD_PLUGIN)
     target_link_libraries(SwellRenderTest PRIVATE SwellNaturalSynth)
     target_include_directories(SwellRenderTest PRIVATE Source $<TARGET_PROPERTY:SwellNaturalSynth,INCLUDE_DIRECTORIES>)
     target_compile_definitions(SwellRenderTest PRIVATE $<TARGET_PROPERTY:SwellNaturalSynth,COMPILE_DEFINITIONS>)
+
+    juce_add_console_app(SwellCapture PRODUCT_NAME "SwellCapture")
+    target_sources(SwellCapture PRIVATE Tests/Capture.cpp)
+    target_link_libraries(SwellCapture PRIVATE SwellNaturalSynth)
+    target_include_directories(SwellCapture PRIVATE Source $<TARGET_PROPERTY:SwellNaturalSynth,INCLUDE_DIRECTORIES>)
+    target_compile_definitions(SwellCapture PRIVATE $<TARGET_PROPERTY:SwellNaturalSynth,COMPILE_DEFINITIONS>)
 
     juce_add_console_app(SwellScoreRender PRODUCT_NAME "SwellScoreRender")
     target_sources(SwellScoreRender PRIVATE Tests/ScoreRender.cpp)

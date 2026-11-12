@@ -193,16 +193,47 @@ void HeroPanel::mouseDown (const MouseEvent& e)
         onToggleFavourite();
 }
 
+// Photographic hero per category (Resources/hero/hero_<key>.jpg); vector art as fallback.
+static Image heroPhoto (const String& key)
+{
+    const String res = "hero_" + (key == "all" ? String ("synth") : key) + "_jpg";
+    int size = 0;
+    if (auto* data = BinaryData::getNamedResource (res.toRawUTF8(), size))
+        return ImageCache::getFromMemory (data, size);
+    return {};
+}
+
+static void drawHeroPhoto (Graphics& g, Rectangle<float> r, const String& category)
+{
+    const auto img = heroPhoto (SwellArt::keyOf (category));
+    if (! img.isValid()) { SwellArt::drawHero (g, r, category, A().accent); return; }
+    Graphics::ScopedSaveState s (g);
+    Path clip;
+    clip.addRoundedRectangle (r, 8.0f);
+    g.reduceClipRegion (clip);
+    g.setImageResamplingQuality (Graphics::highResamplingQuality);
+    g.setOpacity (1.0f);
+    g.drawImage (img, r, RectanglePlacement (RectanglePlacement::xRight | RectanglePlacement::yMid | RectanglePlacement::fillDestination));
+    // Legibility shade on the left for the title, and at the bottom
+    g.setGradientFill (ColourGradient (Colours::black.withAlpha (0.85f), r.getX(), r.getY(), Colours::transparentBlack, r.getX() + r.getWidth() * 0.62f, r.getY(), false));
+    g.fillRect (r);
+    g.setGradientFill (ColourGradient (Colours::transparentBlack, r.getX(), r.getCentreY(), Colours::black.withAlpha (0.35f), r.getX(), r.getBottom(), false));
+    g.fillRect (r);
+}
+
 void HeroPanel::paint (Graphics& g)
 {
     const auto r = getLocalBounds().toFloat();
     drawHardwarePanel (g, r);
     const auto art = r.reduced (3.0f);
-    SwellArt::drawHero (g, art, category, A().accent);
+    drawHeroPhoto (g, art, category);
 
-    g.setColour (text);
+    const String title = instrument != nullptr ? instrument->name : String ("Swell");
     g.setFont (serifFont (40.0f));
-    g.drawFittedText (instrument != nullptr ? instrument->name : String ("Swell"), Rectangle<int> (54, 22, getWidth() - 130, 50), Justification::centredLeft, 1);
+    g.setColour (Colours::black.withAlpha (0.6f));
+    g.drawFittedText (title, Rectangle<int> (55, 24, getWidth() - 130, 50), Justification::centredLeft, 1);
+    g.setColour (text);
+    g.drawFittedText (title, Rectangle<int> (54, 22, getWidth() - 130, 50), Justification::centredLeft, 1);
     g.setColour (dim);
     g.setFont (swellFont (15.0f).withExtraKerningFactor (0.18f));
     g.drawText (category.toUpperCase(), Rectangle<int> (56, 72, getWidth() - 130, 22), Justification::centredLeft);
